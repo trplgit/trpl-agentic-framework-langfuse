@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: langfuse-web
-          image: <will-be-set-by-GitHub-Actions>
+          image: langfuse/langfuse:3
           ports:
             - containerPort: 3000
           envFrom:
