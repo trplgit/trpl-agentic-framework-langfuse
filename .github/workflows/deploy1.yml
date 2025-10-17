@@ -1,0 +1,30 @@
+name: Deployment Dispatcher
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select environment"
+        required: true
+        type: choice
+        options:
+        
+          - staging
+          - production
+
+jobs:
+ 
+
+  deploy-staging:
+    if: ${{ inputs.environment == 'staging' }}
+    uses: ./.github/workflows/deploy.staging.yml
+    with:
+      environment: staging
+    secrets: inherit
+
+  deploy-production:
+    if: ${{ inputs.environment == 'production' }}
+    uses: ./.github/workflows/deploy.production.yml
+    with:
+      environment: production
+    secrets: inherit
