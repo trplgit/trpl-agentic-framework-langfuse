@@ -22,10 +22,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ env.ACR_LOGIN_SERVER }}
+          login-server: ${{ vars.ACR_NAME }}.azurecr.io
           username: ${{ vars.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
@@ -64,8 +70,8 @@ jobs:
       - name: Set AKS context
         run: |
           az aks get-credentials \
-            --resource-group <YOUR_RESOURCE_GROUP> \
-            --name <YOUR_AKS_CLUSTER> \
+            --resource-group TRPL-Prod-AKS \
+            --name TRPL-Prod-Cluster \
             --overwrite-existing
 
       - name: Create namespace if not exists
@@ -75,13 +81,13 @@ jobs:
       - name: Create image pull secret
         run: |
           kubectl create secret docker-registry acr-pull-secret \
-            --docker-server=${{ env.ACR_LOGIN_SERVER }} \
+            --docker-server=${{ vars.ACR_NAME }}.azurecr.io \
             --docker-username=${{ vars.ACR_USERNAME }} \
             --docker-password=${{ secrets.ACR_PASSWORD }} \
             -n ${{ inputs.environment }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Apply environment secret manifest
+      - name: Apply Kubernetes environment secret manifest
         run: |
           kubectl apply -f k8s/langfuse-env-secret.yaml -n ${{ inputs.environment }}
 
