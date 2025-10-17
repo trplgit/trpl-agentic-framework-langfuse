@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: langfuse-worker
-          image: <will-be-set-by-GitHub-Actions>
+          image: langfuse/langfuse-worker:3
           envFrom:
             - secretRef:
                 name: langfuse-env
