@@ -52,7 +52,7 @@ jobs:
           kubectl apply -f k8s/ingress.yaml -n ${{ inputs.environment }}
           kubectl apply -f k8s/deployment.yaml -n ${{ inputs.environment }}
           kubectl apply -f k8s/worker-deployment.yaml -n ${{ inputs.environment }}
-
+          kubectl apply -f k8s/clickhouse-service.yaml -n ${{ inputs.environment }} 
       - name: Wait for rollout
         run: |
           kubectl rollout status deployment/langfuse-web -n ${{ inputs.environment }} --timeout=5m
