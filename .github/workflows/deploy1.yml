@@ -9,18 +9,13 @@ on:
         type: choice
         options:
         
-          - staging
+          
           - production
 
 jobs:
  
 
-  deploy-staging:
-    if: ${{ inputs.environment == 'staging' }}
-    uses: ./.github/workflows/deploy.staging.yml
-    with:
-      environment: staging
-    secrets: inherit
+  
 
   deploy-production:
     if: ${{ inputs.environment == 'production' }}
