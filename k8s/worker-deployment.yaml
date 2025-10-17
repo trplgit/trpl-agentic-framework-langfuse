@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langfuse-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langfuse-worker
+  template:
+    metadata:
+      labels:
+        app: langfuse-worker
+    spec:
+      containers:
+        - name: langfuse-worker
+          image: <will-be-set-by-GitHub-Actions>
+          envFrom:
+            - secretRef:
+                name: langfuse-env
+      imagePullSecrets:
+        - name: acr-pull-secret
