@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: langfuse-web
+  namespace: production
 spec:
   replicas: 1
   selector:
@@ -20,5 +21,22 @@ spec:
           envFrom:
             - secretRef:
                 name: langfuse-env
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: /api/public/health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/public/ready
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
       imagePullSecrets:
         - name: acr-pull-secret
