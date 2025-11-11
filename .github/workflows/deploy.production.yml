@@ -12,10 +12,6 @@ jobs:
   deploy-to-aks:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    env:
-      AZURE_STORAGE_ACCOUNT_NAME: ${{ vars.AZURE_STORAGE_ACCOUNT_NAME }}
-      AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
-      ENVIRONMENT: ${{ inputs.environment }}
 
     steps:
       - name: Checkout code
@@ -46,38 +42,17 @@ jobs:
             -n ${{ inputs.environment }} \
             --dry-run=client -o yaml | kubectl apply -f - || true
 
-      # 🔹 Step 1: Download .env file from Azure Blob Storage
-      - name: Download .env from Azure Blob
+      - name: Apply environment secrets
         run: |
-          echo "Downloading .env for environment: ${ENVIRONMENT}"
-          az storage blob download \
-            --account-name "$AZURE_STORAGE_ACCOUNT_NAME" \
-            --account-key "$AZURE_STORAGE_ACCOUNT_KEY" \
-            --container-name trpl-agentic-framework-supervisor-agent \
-            --name "${ENVIRONMENT}/.env" \
-            --file .env
-          echo "✅ .env file downloaded successfully."
+          kubectl apply -f k8s/langfuse-env-secret.yaml -n ${{ inputs.environment }}
 
-      # 🔹 Step 2: Create or update Kubernetes secret from .env
-      - name: Create or update langfuse-env secret
-        run: |
-          echo "Updating secret langfuse-env in namespace ${{ inputs.environment }}"
-          kubectl delete secret langfuse-env -n ${{ inputs.environment }} --ignore-not-found
-          kubectl create secret generic langfuse-env \
-            --from-env-file=.env \
-            -n ${{ inputs.environment }}
-          echo "✅ Secret updated successfully."
-
-      # 🔹 Step 3: Apply Kubernetes manifests
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/service.yaml -n ${{ inputs.environment }}
           kubectl apply -f k8s/ingress.yaml -n ${{ inputs.environment }}
           kubectl apply -f k8s/deployment.yaml -n ${{ inputs.environment }}
           kubectl apply -f k8s/worker-deployment.yaml -n ${{ inputs.environment }}
-          kubectl apply -f k8s/clickhouse-service.yaml -n ${{ inputs.environment }}
-
-      # 🔹 Step 4: Wait for deployment rollout
+          kubectl apply -f k8s/clickhouse-service.yaml -n ${{ inputs.environment }} 
       - name: Wait for rollout
         run: |
           kubectl rollout status deployment/langfuse-web -n ${{ inputs.environment }} --timeout=5m
