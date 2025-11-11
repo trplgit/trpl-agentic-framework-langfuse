@@ -46,9 +46,10 @@ jobs:
       - name: Download .env from Azure Blob
         run: |
           az storage blob download \
-            --account-name trpl-agentic-framework-supervisor-agent \
-            --container-name ${{ inputs.environment }} \
-            --name .env \
+            --account-name "$AZURE_STORAGE_ACCOUNT" \
+            --account-key "$AZURE_STORAGE_KEY" \
+            --container-name trpl-agentic-framework-supervisor-agent \
+            --name ${ENVIRONMENT}/.env \
             --file .env \
             --account-key "${{ secrets.AZURE_STORAGE_KEY }}"
 
