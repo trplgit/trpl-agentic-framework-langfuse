@@ -12,6 +12,10 @@ jobs:
   deploy-to-aks:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    env:
+      AZURE_STORAGE_ACCOUNT_NAME: ${{ vars.AZURE_STORAGE_ACCOUNT_NAME }}
+      AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+      ENVIRONMENT: ${{ inputs.environment }}
 
     steps:
       - name: Checkout code
@@ -45,23 +49,26 @@ jobs:
       # 🔹 Step 1: Download .env file from Azure Blob Storage
       - name: Download .env from Azure Blob
         run: |
+          echo "Downloading .env for environment: ${ENVIRONMENT}"
           az storage blob download \
             --account-name "$AZURE_STORAGE_ACCOUNT_NAME" \
             --account-key "$AZURE_STORAGE_ACCOUNT_KEY" \
             --container-name trpl-agentic-framework-supervisor-agent \
-            --name ${ENVIRONMENT}/.env \
-            --file .env \
-            --account-key "${{ secrets.AZURE_STORAGE_KEY }}"
+            --name "${ENVIRONMENT}/.env" \
+            --file .env
+          echo "✅ .env file downloaded successfully."
 
       # 🔹 Step 2: Create or update Kubernetes secret from .env
       - name: Create or update langfuse-env secret
         run: |
+          echo "Updating secret langfuse-env in namespace ${{ inputs.environment }}"
           kubectl delete secret langfuse-env -n ${{ inputs.environment }} --ignore-not-found
           kubectl create secret generic langfuse-env \
-            --from-file=.env \
+            --from-env-file=.env \
             -n ${{ inputs.environment }}
+          echo "✅ Secret updated successfully."
 
-      # 🔹 Step 3: Apply Kubernetes manifests (using the updated secret)
+      # 🔹 Step 3: Apply Kubernetes manifests
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/service.yaml -n ${{ inputs.environment }}
