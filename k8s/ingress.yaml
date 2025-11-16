@@ -8,32 +8,42 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: langfuse.teamleaseregtech.com
-      http:
-        paths:
-          # Worker health
-          - path: /api/health
-            pathType: Exact
-            backend:
-              service:
-                name: langfuse-worker
-                port:
-                  number: 3030
+  - host: langfuse.teamleaseregtech.com
+    http:
+      paths:
 
-          # Ingest + public API (this is critical)
-          - path: /api/public
-            pathType: Prefix
-            backend:
-              service:
-                name: langfuse-web
-                port:
-                  number: 80
+      # Health check → correct
+      - path: /api/health
+        pathType: Exact
+        backend:
+          service:
+            name: langfuse-worker
+            port:
+              number: 3030
 
-          # Default route
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: langfuse-web
-                port:
-                  number: 80
+      # Ingest traffic → MUST go to worker
+      - path: /api/public/ingest
+        pathType: Prefix
+        backend:
+          service:
+            name: langfuse-worker
+            port:
+              number: 3030
+
+      # All other /api/public → also worker (safe)
+      - path: /api/public
+        pathType: Prefix
+        backend:
+          service:
+            name: langfuse-worker
+            port:
+              number: 3030
+
+      # UI → goes to web
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: langfuse-web
+            port:
+              number: 80
