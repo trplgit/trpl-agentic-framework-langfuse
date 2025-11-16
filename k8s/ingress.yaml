@@ -5,7 +5,11 @@ metadata:
   namespace: production
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE, PATCH"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Forwarded-Proto https;
 spec:
   ingressClassName: nginx
   rules:
@@ -21,8 +25,8 @@ spec:
                 port:
                   number: 3030
 
-          # Web readiness/liveness and public APIs
-          - path: /api/public(/|$)(.*)
+          # Public API + ingest (SDK, LangChain, traces)
+          - path: /api/public
             pathType: Prefix
             backend:
               service:
