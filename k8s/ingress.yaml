@@ -11,6 +11,7 @@ spec:
     - host: langfuse.teamleaseregtech.com
       http:
         paths:
+          # Worker health
           - path: /api/health
             pathType: Exact
             backend:
@@ -19,6 +20,7 @@ spec:
                 port:
                   number: 3030
 
+          # Ingest + public API (this is critical)
           - path: /api/public
             pathType: Prefix
             backend:
@@ -27,6 +29,7 @@ spec:
                 port:
                   number: 80
 
+          # Default route
           - path: /
             pathType: Prefix
             backend:
