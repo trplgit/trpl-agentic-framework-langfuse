@@ -5,18 +5,12 @@ metadata:
   namespace: production
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE, PATCH"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      proxy_set_header X-Forwarded-Proto https;
 spec:
   ingressClassName: nginx
   rules:
     - host: langfuse.teamleaseregtech.com
       http:
         paths:
-          # Worker health at /api/health
           - path: /api/health
             pathType: Exact
             backend:
@@ -25,7 +19,6 @@ spec:
                 port:
                   number: 3030
 
-          # Public API + ingest (SDK, LangChain, traces)
           - path: /api/public
             pathType: Prefix
             backend:
@@ -34,7 +27,6 @@ spec:
                 port:
                   number: 80
 
-          # Default route to web
           - path: /
             pathType: Prefix
             backend:
