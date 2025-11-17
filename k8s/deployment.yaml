@@ -18,6 +18,13 @@ spec:
           image: langfuse/langfuse:3
           ports:
             - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: LANGFUSE_PRODUCTION
+              value: "true"
+            - name: NEXT_TELEMETRY_DISABLED
+              value: "1"
           envFrom:
             - secretRef:
                 name: langfuse-env
