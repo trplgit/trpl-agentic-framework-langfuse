@@ -15,12 +15,16 @@ spec:
     spec:
       containers:
         - name: langfuse-web
-          image: langfuse/langfuse:3
+          # Pinned to a stable v3 release to avoid ZodError bug
+          image: langfuse/langfuse:3.132.0
           ports:
             - containerPort: 3000
           envFrom:
             - secretRef:
                 name: langfuse-env
+          env:
+            - name: ZOD_ERROR_OVERRIDE
+              value: "true"
           # Health checks
           livenessProbe:
             httpGet:
