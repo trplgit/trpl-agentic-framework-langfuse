@@ -16,25 +16,27 @@ spec:
       containers:
         - name: langfuse-worker
           image: langfuse/langfuse-worker:3
+          ports:
+            - containerPort: 3030
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: LANGFUSE_PRODUCTION
+              value: "true"
           envFrom:
             - secretRef:
                 name: langfuse-env
-          # Health checks
           livenessProbe:
             httpGet:
               path: /api/health
               port: 3030
             initialDelaySeconds: 20
             periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /api/health
               port: 3030
             initialDelaySeconds: 10
             periodSeconds: 15
-            timeoutSeconds: 5
-            failureThreshold: 3
       imagePullSecrets:
         - name: acr-pull-secret
