@@ -25,10 +25,11 @@ spec:
               value: "true"
             - name: NEXT_TELEMETRY_DISABLED
               value: "1"
+            - name: LANGFUSE_INIT_DATABASE
+              value: "true"
           envFrom:
             - secretRef:
                 name: langfuse-env
-          # Health checks
           livenessProbe:
             httpGet:
               path: /api/public/health
@@ -36,7 +37,6 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 30
             timeoutSeconds: 5
-            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /api/public/ready
@@ -44,6 +44,5 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 15
             timeoutSeconds: 5
-            failureThreshold: 3
       imagePullSecrets:
         - name: acr-pull-secret
