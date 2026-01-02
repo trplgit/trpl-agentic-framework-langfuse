@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: langfuse-web
-          image: langfuse/langfuse:3
+          image: langfuse/langfuse:3.2.1  # fixed minor version recommended
           ports:
             - containerPort: 3000
           env:
@@ -27,6 +27,8 @@ spec:
               value: "1"
             - name: LANGFUSE_INIT_DATABASE
               value: "true"
+            - name: CLICKHOUSE_DEFAULT_DATABASE
+              value: "langfuse"  # ensure migrations target correct DB
           envFrom:
             - secretRef:
                 name: langfuse-env
