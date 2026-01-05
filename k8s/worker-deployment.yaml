@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: langfuse-worker
-          image: langfuse/langfuse-worker:3
+          image: langfuse/langfuse-worker:2.90.0
           ports:
             - containerPort: 3030
           env:
