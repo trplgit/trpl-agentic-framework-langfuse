@@ -27,7 +27,9 @@ spec:
               value: "1"
             - name: LANGFUSE_INIT_DATABASE
               value: "true"
-            
+            - name: LANGFUSE_DISABLE_ENV_VALIDATION
+              value: "true"
+
             - name: CLICKHOUSE_CLUSTER_ENABLED
               value: "false"
           envFrom:
