@@ -23,6 +23,8 @@ spec:
               value: "production"
             - name: LANGFUSE_PRODUCTION
               value: "true"
+            - name: LANGFUSE_CLICKHOUSE_MIGRATE
+              value: "true"
           envFrom:
             - secretRef:
                 name: langfuse-env
