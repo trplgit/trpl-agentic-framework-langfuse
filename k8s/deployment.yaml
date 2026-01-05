@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: langfuse-web
-          image: langfuse/langfuse:3.2.1  # fixed minor version recommended
+          image: langfuse/langfuse:3.2.1
           ports:
             - containerPort: 3000
           env:
@@ -28,23 +28,9 @@ spec:
             - name: LANGFUSE_INIT_DATABASE
               value: "true"
             - name: CLICKHOUSE_DEFAULT_DATABASE
-              value: "langfuse"  # ensure migrations target correct DB
+              value: "langfuse"
+            ✅ - name: CLICKHOUSE_CLUSTER_ENABLED
+              value: "false"
           envFrom:
             - secretRef:
                 name: langfuse-env
-          livenessProbe:
-            httpGet:
-              path: /api/public/health
-              port: 3000
-            initialDelaySeconds: 20
-            periodSeconds: 30
-            timeoutSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /api/public/ready
-              port: 3000
-            initialDelaySeconds: 10
-            periodSeconds: 15
-            timeoutSeconds: 5
-      imagePullSecrets:
-        - name: acr-pull-secret
