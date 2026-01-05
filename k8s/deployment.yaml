@@ -29,7 +29,7 @@ spec:
               value: "true"
             - name: CLICKHOUSE_DEFAULT_DATABASE
               value: "langfuse"
-            ✅ - name: CLICKHOUSE_CLUSTER_ENABLED
+            - name: CLICKHOUSE_CLUSTER_ENABLED
               value: "false"
           envFrom:
             - secretRef:
