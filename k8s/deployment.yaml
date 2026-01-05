@@ -27,8 +27,7 @@ spec:
               value: "1"
             - name: LANGFUSE_INIT_DATABASE
               value: "true"
-            - name: CLICKHOUSE_DEFAULT_DATABASE
-              value: "langfuse"
+            
             - name: CLICKHOUSE_CLUSTER_ENABLED
               value: "false"
           envFrom:
