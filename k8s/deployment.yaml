@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: langfuse-web
-          image: langfuse/langfuse:4.0.0
+          image: langfuse/langfuse:2.90.0
           ports:
             - containerPort: 3000
           env:
@@ -27,6 +27,7 @@ spec:
               value: "1"
             - name: LANGFUSE_INIT_DATABASE
               value: "true"
+            
             - name: CLICKHOUSE_CLUSTER_ENABLED
               value: "false"
           envFrom:
