@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: langfuse-web
-          image: langfuse/langfuse:4.0.0
+          image: langfuse/langfuse:4.47.0
           ports:
             - containerPort: 3000
           env:
