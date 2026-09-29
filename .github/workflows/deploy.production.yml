@@ -42,9 +42,7 @@ jobs:
             -n ${{ inputs.environment }} \
             --dry-run=client -o yaml | kubectl apply -f - || true
 
-      - name: Apply environment secrets
-        run: |
-          kubectl apply -f k8s/langfuse-env-secret.yaml -n ${{ inputs.environment }}
+     
 
       - name: Apply Kubernetes manifests
         run: |
