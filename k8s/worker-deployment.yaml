@@ -13,9 +13,16 @@ spec:
       labels:
         app: langfuse-worker
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: langfuse-worker
-          image: langfuse/langfuse-worker:4.70.0
+          image: langfuse/langfuse-worker:4.86.0
           ports:
             - containerPort: 3030
           env:
@@ -28,6 +35,16 @@ spec:
           envFrom:
             - secretRef:
                 name: langfuse-env
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              memory: 4Gi
           livenessProbe:
             httpGet:
               path: /api/health

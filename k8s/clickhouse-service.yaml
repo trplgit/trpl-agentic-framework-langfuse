@@ -30,17 +30,56 @@ spec:
       labels:
         app: clickhouse
     spec:
+      automountServiceAccountToken: false
+      # Run as the image's built-in clickhouse user (101) instead of root.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: clickhouse
           image: clickhouse/clickhouse-server:latest
           ports:
             - containerPort: 8123
             - containerPort: 9000
+          # Credentials come from the langfuse-env secret managed in AKS
+          # (same keys Langfuse web/worker use), not from this file.
           env:
             - name: CLICKHOUSE_USER
-              value: clickhouse
+              valueFrom:
+                secretKeyRef:
+                  name: langfuse-env
+                  key: CLICKHOUSE_USER
             - name: CLICKHOUSE_PASSWORD
-              value: clickhouse
+              valueFrom:
+                secretKeyRef:
+                  name: langfuse-env
+                  key: CLICKHOUSE_PASSWORD
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              memory: 8Gi
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8123
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8123
+            initialDelaySeconds: 30
+            periodSeconds: 30
           volumeMounts:
             - name: clickhouse-data
               mountPath: /var/lib/clickhouse
@@ -52,3 +91,29 @@ spec:
         resources:
           requests:
             storage: 1Gi
+---
+# Only Langfuse web and worker may reach ClickHouse (HTTP 8123, native 9000).
+# Without this, any pod in the cluster can connect to it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: clickhouse-allow-langfuse
+  namespace: production
+spec:
+  podSelector:
+    matchLabels:
+      app: clickhouse
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values: ["langfuse-web", "langfuse-worker"]
+      ports:
+        - protocol: TCP
+          port: 8123
+        - protocol: TCP
+          port: 9000
