@@ -44,13 +44,20 @@ jobs:
 
      
 
+      # ClickHouse first: web runs its ClickHouse migrations on startup and
+      # restarts until ClickHouse is ready, so roll it out and wait for it before
+      # updating web/worker. A failed ClickHouse rollout now fails the deploy.
+      - name: Apply and wait for ClickHouse
+        run: |
+          kubectl apply -f k8s/clickhouse-service.yaml -n ${{ inputs.environment }}
+          kubectl rollout status statefulset/clickhouse -n ${{ inputs.environment }} --timeout=5m
+
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/service.yaml -n ${{ inputs.environment }}
           kubectl apply -f k8s/ingress.yaml -n ${{ inputs.environment }}
           kubectl apply -f k8s/deployment.yaml -n ${{ inputs.environment }}
           kubectl apply -f k8s/worker-deployment.yaml -n ${{ inputs.environment }}
-          kubectl apply -f k8s/clickhouse-service.yaml -n ${{ inputs.environment }} 
       - name: Wait for rollout
         run: |
           kubectl rollout status deployment/langfuse-web -n ${{ inputs.environment }} --timeout=5m
