@@ -42,7 +42,9 @@ spec:
           type: RuntimeDefault
       containers:
         - name: clickhouse
-          image: clickhouse/clickhouse-server:latest
+          # Pinned to the exact image running in production on 2026-11-26 (was :latest),
+          # so pod restarts never silently change the ClickHouse version.
+          image: clickhouse/clickhouse-server@sha256:7175c09031a599d17b43046abe3c79a70bd4263f77e4a8991286b4fc4886b1b0
           ports:
             - containerPort: 8123
             - containerPort: 9000
