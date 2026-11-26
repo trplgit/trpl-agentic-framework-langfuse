@@ -13,9 +13,16 @@ spec:
       labels:
         app: langfuse-web
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: langfuse-web
-          image: langfuse/langfuse:4.70.0
+          image: langfuse/langfuse:4.86.0
           ports:
             - containerPort: 3000
           env:
@@ -32,3 +39,31 @@ spec:
           envFrom:
             - secretRef:
                 name: langfuse-env
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              memory: 4Gi
+          # Startup runs DB migrations, so allow up to 5 minutes before liveness applies.
+          startupProbe:
+            httpGet:
+              path: /api/public/health
+              port: 3000
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /api/public/health
+              port: 3000
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /api/public/health
+              port: 3000
+            periodSeconds: 30
+            failureThreshold: 3
